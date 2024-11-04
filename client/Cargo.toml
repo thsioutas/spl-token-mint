@@ -1,0 +1,12 @@
+[package]
+name = "spl-token-client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+dirs = "5.0"
+solana-client = "2.0.18"
+solana-program = "2.0.18"
+solana-sdk = "2.0.18"
+spl-token = "6.0"
