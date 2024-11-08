@@ -74,7 +74,9 @@ fn initialize_mint(accounts: &[AccountInfo], data: InitializeMintArgs) -> Progra
 
     let decimals = data.decimals;
 
-    // Step 1: Create the mint account.
+    // Step 1:
+    // The Authority Account initiates the creation of the Mint Account.
+    // This mint account will define the parameters of the new token type.
     msg!("Creating mint account ({})", mint_account.key);
     invoke(
         &system_instruction::create_account(
@@ -92,7 +94,9 @@ fn initialize_mint(accounts: &[AccountInfo], data: InitializeMintArgs) -> Progra
         ],
     )?;
 
-    // Step 2: Initialize the mint account using the SPL Token program
+    // Step 2: The Mint Account is then initialized with the Token Program.
+    // This sets important properties, such as the number of decimal places
+    // (for divisibility) and the authority that controls minting.
     msg!("Initializing mint account ({})", mint_account.key);
     invoke(
         &token_instruction::initialize_mint(
@@ -117,7 +121,7 @@ fn initialize_mint(accounts: &[AccountInfo], data: InitializeMintArgs) -> Progra
 ///
 /// # Parameters
 /// - `program_id`: The program's public key.
-/// - `accounts`: The accounts needed for minting (mint account, token account, authority account, and token program).
+/// - `accounts`: The accounts needed for minting (mint account, authority account, associated_token_account, payer, token program and associated_token_program).
 /// - `data`: The input data specifying MintTo parameters (like amount).
 ///
 /// # Returns
@@ -137,6 +141,8 @@ fn mint_token(accounts: &[AccountInfo], data: MintToArgs) -> ProgramResult {
     let amount = data.amount;
     msg!("Mint {} tokens on account {}", amount, mint_account.key);
 
+    // Step 1: The User Wallet checks if an Associated Token Account exists to hold tokens
+    // of this specific mint. If not, the program creates this associated token account.
     if associated_token_account.lamports() == 0 {
         msg!("Creating associated token account");
         invoke(
@@ -159,7 +165,8 @@ fn mint_token(accounts: &[AccountInfo], data: MintToArgs) -> ProgramResult {
         msg!("Associated token account exists");
     }
 
-    // Mint tokens to the specified token account using the SPL Token program.
+    // Step 2: The Mint Account mints a specified number of tokens and deposits
+    // them into the Associated Token Account.
     invoke(
         &token_instruction::mint_to(
             token_program.key,
